@@ -32,7 +32,6 @@ class ExtraActionButton(CalcButton):
         self.color = ft.colors.BLACK
 
 
-
 class CalculatorApp(ft.Container):
     # application's root control (i.e. "view") containing all other controls
     def __init__(self):
@@ -50,6 +49,29 @@ class CalculatorApp(ft.Container):
                 ft.Row(
                     controls=[
                         ExtraActionButton(
+                            text="π", button_clicked=self.button_clicked
+                        ),
+                        ExtraActionButton(
+                            text="e", button_clicked=self.button_clicked
+                        ),
+                        ExtraActionButton(
+                            text="√", button_clicked=self.button_clicked
+                        )
+                    ]
+                ),
+                ft.Row(
+                    controls=[
+                        ExtraActionButton(
+                            text="log", button_clicked=self.button_clicked
+                        ),
+                        ExtraActionButton(
+                            text="exp", button_clicked=self.button_clicked
+                        )
+                    ]
+                ),
+                ft.Row(
+                    controls=[
+                        ExtraActionButton(
                             text="sin", button_clicked=self.button_clicked
                         ),
                         ExtraActionButton(
@@ -57,7 +79,8 @@ class CalculatorApp(ft.Container):
                         ),
                         ExtraActionButton(
                             text="tan", button_clicked=self.button_clicked
-                        )
+                        ),
+                        
                     ]
                 ),
                 ft.Row(
@@ -108,15 +131,15 @@ class CalculatorApp(ft.Container):
             ]
         )
 
-# UIの設定は以上
-# 以下から計算
+    # UIの設定は以上
+    # 以下から計算
 
     def button_clicked(self, e):
         data = e.control.data
         print(f"Button clicked with data = {data}")
-        #ボタンがクリックされた結果がdataに入る
+        # ボタンがクリックされた結果がdataに入る
 
-        # 以下、それぞれのボタンが押された時の挙動を指示v
+        # 以下、それぞれのボタンが押された時の挙動を指示
         if self.result.value == "Error" or data == "AC":
             self.result.value = "0"
             self.reset()
@@ -162,26 +185,54 @@ class CalculatorApp(ft.Container):
                     self.format_number(abs(float(self.result.value)))
                 )
 
-
-
         elif data in ("sin", "cos", "tan"):
-                try:
-                    # 入力された値をラジアンに変換して計算
-                    value_in_radians = math.radians(float(self.result.value))
-                    if data == "sin":
-                        self.result.value = self.format_number(math.sin(value_in_radians))
-                    elif data == "cos":
-                        self.result.value = self.format_number(math.cos(value_in_radians))
-                    elif data == "tan":
-                                    # tanの場合、90度（π/2ラジアン）のような値ではエラーを表示
-                        if abs(value_in_radians % math.pi - math.pi / 2) < 1e-10:
-                            self.result.value = "Error"
-                        else:
-                            self.result.value = self.format_number(math.tan(value_in_radians))
-                except ValueError:
-                    self.result.value = "Error"
-                
-                self.reset()
+            try:
+                # 入力された値をラジアンに変換して計算
+                value_in_radians = math.radians(float(self.result.value))
+                if data == "sin":
+                    self.result.value = self.format_number(math.sin(value_in_radians))
+                elif data == "cos":
+                    self.result.value = self.format_number(math.cos(value_in_radians))
+                elif data == "tan":
+                    # tanの場合、90度（π/2ラジアン）のような値ではエラーを表示
+                    if abs(value_in_radians % math.pi - math.pi / 2) < 1e-10:
+                        self.result.value = "Error"
+                    else:
+                        self.result.value = self.format_number(math.tan(value_in_radians))
+            except ValueError:
+                self.result.value = "Error"
+            self.reset()
+
+        elif data in ("log", "exp"):
+            try:
+                if data == "log":
+                    # logの場合、入力値が0以下だとエラー
+                    if float(self.result.value) <= 0:
+                        self.result.value = "Error"
+                    else:
+                        self.result.value = self.format_number(math.log(float(self.result.value)))
+                elif data == "exp":
+                    # expの場合、指数関数を計算
+                    self.result.value = self.format_number(math.exp(float(self.result.value)))
+            except ValueError:
+                self.result.value = "Error"
+            self.reset()
+            
+        elif data in ("π", "e", "√"):
+            try:
+                if data == "π":
+                    self.result.value = self.format_number(math.pi)
+                elif data == "e":
+                    self.result.value = self.format_number(math.e)
+                elif data == "√":
+                    if float(self.result.value) < 0:
+                        self.result.value = "Error"  # 負の数は平方根を計算できない
+                    else:
+                        self.result.value = self.format_number(math.sqrt(float(self.result.value)))
+            except ValueError:
+                self.result.value = "Error"
+            
+            self.reset()
 
         self.update()
 
@@ -192,7 +243,6 @@ class CalculatorApp(ft.Container):
             return num
 
     def calculate(self, operand1, operand2, operator):
-
         if operator == "+":
             return self.format_number(operand1 + operand2)
 
@@ -225,4 +275,3 @@ def main(page: ft.Page):
 
 ft.app(target=main)
 
-# or
